@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calcolo Limiti: Asintoti Orizzontali - 4C</title>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background: #f5f5f5;
+            color: #1a1a1a;
+            line-height: 1.5;
+        }
+
+        /* === NAV === */
+        .nav {
+            position: fixed;
+            bottom: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            z-index: 1000;
+            background: white;
+            padding: 8px 16px;
+            border-radius: 30px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.12);
+        }
+        .nav button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 15px;
+            transition: background 0.2s;
+        }
+        .nav button:hover { background: #1d4ed8; }
+        .nav button:disabled { background: #cbd5e1; cursor: not-allowed; }
+        .slide-counter {
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+            font-weight: 500;
+            color: #666;
+            font-size: 15px;
+        }
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: #2563eb;
+            transition: width 0.3s;
+            z-index: 1001;
+        }
+
+        /* === SLIDE === */
+        .slide {
+            display: none;
+            min-height: 100vh;
+            padding: 50px 70px 90px;
+            background: white;
+        }
+        .slide.active { display: flex; flex-direction: column; animation: fadeIn 0.3s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+
+        .slide h1 { font-size: 44px; font-weight: 700; margin-bottom: 30px; }
+        .slide h2 { font-size: 34px; font-weight: 600; margin-bottom: 24px; color: #1e293b; }
+        .slide h3 { font-size: 26px; font-weight: 500; margin-bottom: 16px; color: #334155; }
+        .slide p { font-size: 22px; margin-bottom: 16px; max-width: 950px; }
+        .slide .subtitle { font-size: 26px; color: #64748b; margin-bottom: 40px; }
+
+        /* === FORMULA BOX === */
+        .formula-box {
+            background: #f8fafc;
+            border-left: 4px solid #2563eb;
+            padding: 24px 32px;
+            margin: 20px 0;
+            font-size: 26px;
+            border-radius: 0 8px 8px 0;
+        }
+        .formula-box.green { border-left-color: #16a34a; background: #f0fdf4; }
+        .formula-box.red { border-left-color: #dc2626; background: #fef2f2; }
+        .formula-box.amber { border-left-color: #d97706; background: #fffbeb; }
+
+        /* === LAYOUT === */
+        .two-columns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+            align-items: start;
+            flex: 1;
+        }
+        .three-columns {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 30px;
+            flex: 1;
+        }
+
+        /* === CHART === */
+        .chart-container {
+            background: white;
+            padding: 16px;
+            border-radius: 8px;
+            box-shadow: 0 1px 6px rgba(0,0,0,0.08);
+            border: 1px solid #e2e8f0;
+        }
+
+        /* === TABLE === */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 20px;
+            margin: 16px 0;
+        }
+        .data-table th, .data-table td {
+            border: 1px solid #cbd5e1;
+            padding: 10px 14px;
+            text-align: center;
+        }
+        .data-table th { background: #f1f5f9; font-weight: 600; }
+        .data-table tr.highlight-row { background: #dbeafe; }
+        .data-table .fade { color: #94a3b8; }
+
+        /* === CASO CARD === */
+        .caso-card {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 24px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .caso-card:hover { border-color: #2563eb; box-shadow: 0 4px 12px rgba(37,99,235,0.1); }
+        .caso-card h3 { font-size: 22px; margin-bottom: 12px; }
+        .caso-card .tag {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+        .tag-blue { background: #dbeafe; color: #1d4ed8; }
+        .tag-green { background: #dcfce7; color: #15803d; }
+        .tag-red { background: #fee2e2; color: #b91c1c; }
+
+        /* === STEP REVEAL === */
+        .step { opacity: 0.15; transition: opacity 0.4s; margin-bottom: 12px; }
+        .step.visible { opacity: 1; }
+
+        /* === EXERCISE === */
+        .exercise-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 12px 0;
+            font-size: 20px;
+            flex-wrap: wrap;
+        }
+        .exercise-row input {
+            font-size: 18px;
+            padding: 8px 14px;
+            border: 2px solid #cbd5e1;
+            border-radius: 6px;
+            width: 80px;
+            text-align: center;
+            transition: border-color 0.2s;
+        }
+        .exercise-row input:focus { border-color: #2563eb; outline: none; }
+        .exercise-row input.correct { border-color: #16a34a; background: #f0fdf4; }
+        .exercise-row input.incorrect { border-color: #dc2626; background: #fef2f2; }
+        .exercise-row select {
+            font-size: 18px;
+            padding: 8px 14px;
+            border: 2px solid #cbd5e1;
+            border-radius: 6px;
+        }
+        .check-btn {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+        }
+        .check-btn:hover { background: #1d4ed8; }
+        .feedback { font-weight: 600; font-size: 18px; min-height: 24px; margin-top: 4px; }
+        .feedback.correct { color: #16a34a; }
+        .feedback.incorrect { color: #dc2626; }
+
+        /* === NOTE === */
+        .note {
+            background: #eff6ff;
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin: 16px 0;
+            font-size: 20px;
+            color: #1e40af;
+            border: 1px solid #bfdbfe;
+        }
+
+        /* === SCORE === */
+        .score-display {
+            font-size: 48px;
+            font-weight: 700;
+            color: #2563eb;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        /* === INTERACTIVE GRAPH CONTROLS === */
+        .graph-controls {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            margin-top: 16px;
+        }
+        .control-group { margin-bottom: 14px; }
+        .control-group:last-child { margin-bottom: 0; }
+        .control-group label { display: block; font-size: 16px; font-weight: 500; margin-bottom: 6px; color: #475569; }
+        .control-row { display: flex; align-items: center; gap: 12px; }
+        .control-row input[type="range"] {
+            flex: 1;
+            height: 6px;
+            -webkit-appearance: none;
+            background: #cbd5e1;
+            border-radius: 3px;
+            outline: none;
+        }
+        .control-row input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: #2563eb;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        .control-row .value {
+            min-width: 50px;
+            text-align: right;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            font-weight: 600;
+            color: #2563eb;
+        }
+
+        /* === COUNTDOWN ANIM === */
+        .reveal-btn {
+            background: #f59e0b;
+            color: white;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: 600;
+            margin: 16px 0;
+        }
+        .reveal-btn:hover { background: #d97706; }
+
+        .big-result {
+            font-size: 64px;
+            font-weight: 700;
+            color: #2563eb;
+            text-align: center;
+            padding: 30px;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+        .big-result.show { opacity: 1; }
+    </style>
+</head>
+<body>
+
+<div class="progress-bar" id="progress-bar"></div>
+
+<!-- ================================================ -->
+<!-- SLIDE 1: TITOLO -->
+<!-- ================================================ -->
+<div class="slide active" id="slide-1">
+    <h1>Calcolo dei Limiti</h1>
+    <p class="subtitle">Asintoti Orizzontali per funzioni razionali</p>
+    <div style="flex:1; display:flex; align-items:center;">
+        <div class="three-columns" style="width:100%;">
+            <div class="caso-card" style="text-align:center;">
+                <span class="tag tag-blue">CASO 1</span>
+                <p style="font-size:20px;">gr. num &lt; gr. den</p>
+                <div style="font-size:48px; font-weight:700; color:#2563eb; margin:16px 0;">0</div>
+            </div>
+            <div class="caso-card" style="text-align:center;">
+                <span class="tag tag-green">CASO 2</span>
+                <p style="font-size:20px;">gr. num = gr. den</p>
+                <div style="font-size:48px; font-weight:700; color:#16a34a; margin:16px 0;">\(\frac{a}{b}\)</div>
+            </div>
+            <div class="caso-card" style="text-align:center;">
+                <span class="tag tag-red">CASO 3</span>
+                <p style="font-size:20px;">gr. num &gt; gr. den</p>
+                <div style="font-size:48px; font-weight:700; color:#dc2626; margin:16px 0;">\(\pm\infty\)</div>
+            </div>
+        </div>
+    </div>
+    <p style="text-align:center; color:#94a3b8; font-size:18px;">Premi <b>Avanti</b> o <b>freccia destra</b> per iniziare</p>
+</div>
+
+<!-- ================================================ -->
+<!-- SLIDE 2: IL PROBLEMA -->
+<!-- ================================================ -->
+<div class="slide" id="slide-2">
+    <h2>Il problema: \(\frac{\infty}{\infty}\) ?</h2>
+    <p>Consideriamo questa funzione razionale:</p>
+    <div class="formula-box">
+        \[ f(x) = \frac{5x^2 - 3x + 1}{2x^2 + 7} \]
+    </div>
+    <p>Cosa succede quando \(x \to +\infty\)?</p>
+    <p>Il numeratore \(\to \infty\) e il denominatore \(\to \infty\).</p>
+
+    <div class="formula-box red" style="font-size:28px; text-align:center;">
+        \(\dfrac{\infty}{\infty} = \;?\)
+        <br><br>
+        <span style="font-size:22px; font-weight:600;">NON si puo' semplificare! E' una forma indeterminata.</span>
+    </div>
+
+    <p>Serve un <b>metodo</b> per risolvere. Vediamo due strade.</p>
+</div>
+
+<!-- ================================================ -->
+<!-- SLIDE 3: METODO LUNGO (TABELLA) -->
+<!-- ================================================ -->
+<div class="slide" id="slide-3">
+    <h2>Strada 1: la tabella (metodo lungo)</h2>
+
+    <div class="two-columns">
+        <div>
+            <p>Calcoliamo \(f(x) = \dfrac{5x^2 - 3x + 1}{2x^2 + 7}\) per valori di \(x\) sempre piu' grandi:</p>
+
+            <table class="data-table" id="approach-table">
+                <tr><th>\(x\)</th><th>Numeratore</th><th>Denominatore</th><th>\(f(x)\)</th></tr>
+                <tr class="fade" id="row-1"><td>1</td><td>3</td><td>9</td><td>0,333</td></tr>
+                <tr class="fade" id="row-2"><td>10</td><td>471</td><td>207</td><td>2,275</td></tr>
+                <tr class="fade" id="row-3"><td>100</td><td>49 701</td><td>20 007</td><td>2,484</td></tr>
+                <tr class="fade" id="row-4"><td>1 000</td><td>4 997 001</td><td>2 000 007</td><td>2,4985</td></tr>
+                <tr class="fade" id="row-5"><td>10 000</td><td>&asymp; 5&middot;10<sup>8</sup></td><td>&asymp; 2&middot;10<sup>8</sup></td><td>2,49998</td></tr>
+            </table>
+
+            <button class="reveal-btn" onclick="revealRows()">Mostra riga successiva</button>
+
+            <div id="table-conclusion" style="opacity:0; transition:opacity 0.5s; margin-top:16px;">
+                <div class="note">
+                    I valori si avvicinano a <b>2,5</b>. Ma ci sono serviti <b>5 calcoli pesanti</b>!
+                </div>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <canvas id="chart-approach"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- ================================================ -->
+<!-- SLIDE 4: METODO VELOCE (LA REGOLA) -->
+<!-- ================================================ -->
+<div class="slide" id="slide-4">
+    <h2>Strada 2: la regola (3 secondi)</h2>
+
+    <div class="two-columns">
+        <div>
+            <p>\(f(x) = \dfrac{5x^2 - 3x + 1}{2x^2 + 7}\)</p>
+
+            <div class="step visible" id="step4-1">
+                <p><b>Passo 1:</b> Grado del numeratore = <b>2</b></p>
+            </div>
+            <div class="step" id="step4-2">
+                <p><b>Passo 2:</b> Grado del denominatore = <b>2</b></p>
+            </div>
+            <div class="step" id="step4-3">
+                <p><b>Passo 3:</b> I gradi sono <b>uguali</b> (2 = 2)</p>
+            </div>
+            <div class="step" id="step4-4">
+                <div class="formula-box green">
+                    \[ \text{Limite} = \frac{\text{coefficiente di } x^2 \text{ al num}}{\text{coefficiente di } x^2 \text{ al den}} = \frac{5}{2} = 2{,}5 \]
+                </div>
+            </div>
+
+            <button class="reveal-btn" onclick="revealStep4()">Passo successivo</button>
+
+            <div class="step" id="step4-5">
+                <div class="note">Stessa risposta della tabella. Ma in <b>3 secondi</b>, non 5 minuti!</div>
+            </div>
+        </div>
+
+        <div style="display:flex; flex-direction:column; align-items:center; justify-content:center;">
+            <div style="font-size:22px; color:#64748b; margin-bottom:16px;">Tabella: 5 calcoli</div>
+            <div style="font-size:80px; margin-bottom:20px;">&#9203;</div>
+            <div style="font-size:22px; color:#64748b; margin-bottom:16px;">vs</div>
+            <div style="font-size:22px; color:#16a34a; font-weight:700; margin-bottom:16px;">Regola: 3 secondi</div>
+            <div style="font-size:80px;">&#9889;</div>
+        </div>
+    </div>
+</div>
+
+<!-- ================================================ -->
+<!-- SLIDE 5: I 3 CASI - PANORAMICA -->
+<!-- ================================================ -->
+<div class="slide" id="slide-5">
+    <h2>La regola: confronta i gradi</h2>
+    <p>Per \(\lim_{x\to\pm\infty} \dfrac{P(x)}{Q(x)}\) con \(P\) di grado \(n\) e \(Q\) di grado \(m\):</p>
+
+    <div class="three-columns" style="margin-top:24px;">
+        <div class="caso-card">
+            <span class="tag tag-blue">CASO 1: \(n < m\)</span>
+            <h3>Il den domina</h3>
+            <div class="formula-box" style="padding:16px; font-size:22px;">
+                \[\text{Limite} = 0\]
+            </div>
+            <p style="font-size:18px;">La frazione si schiaccia verso zero.</p>
+            <p style="font-size:18px;"><b>AO:</b> \(y = 0\)</p>
+        </div>
+
+        <div class="caso-card">
+            <span class="tag tag-green">CASO 2: \(n = m\)</span>
+            <h3>Pari grado</h3>
+            <div class="formula-box green" style="padding:16px; font-size:22px;">
+                \[\text{Limite} = \frac{a}{b}\]
+            </div>
+            <p style="font-size:18px;">Rapporto dei coefficienti del grado massimo.</p>
+            <p style="font-size:18px;"><b>AO:</b> \(y = \frac{a}{b}\)</p>
+        </div>
+
+        <div class="caso-card">
+            <span class="tag tag-red">CASO 3: \(n > m\)</span>
+            <h3>Il num domina</h3>
+            <div class="formula-box red" style="padding:16px; font-size:22px;">
+                \[\text{Limite} = \pm\infty\]
+            </div>
+            <p style="font-size:18px;">La funzione esplode.</p>
+            <p style="font-size:18px;"><b>AO:</b> non esiste!</p>
+        </div>
+    </div>
+</div>
+
+<!-- ================================================ -->
+<!-- SLIDE 6: CASO 1 CON GRAFICO -->
+<!-- ================================================ -->
+<div class="slide" id="slide-6">
+    <h2><span class="tag tag-blue">CASO 1</span> &nbsp; Grado num &lt; grado den &rarr; 0</h2>
+
+    <div class="two-columns">
+        <div>
+            <div class="formula-box">
+                \[ \lim_{x\to\pm\infty} \frac{ax^n + \ldots}{bx^m + \ldots} = 0 \quad \text{se } n < m \]
+            </div>
+
+            <p><b>Esempio:</b></p>
+            <div class="formula-box" style="font-size:24px;">
+                \[ \lim_{x\to+\infty} \frac{3x + 1}{x^2 - 4} \]
+            </div>
+
+            <div class="step visible" id="step6-1">
+                <p>Grado num = <b>1</b>, grado den = <b>2</b></p>
+            </div>
+            <div class="step" id="step6-2">
+                <p>Poiche' \(1 < 2\): il denominatore domina</p>
+            </div>
+            <div class="step" id="step6-3">
+                <p style="font-size:26px; font-weight:600; color:#2563eb;">\(\Rightarrow\) Limite = \(\boxed{0}\) &emsp; AO: \(y = 0\)</p>
+            </div>
+
+            <button class="reveal-btn" onclick="revealSteps('step6-', 3)">Passo successivo</button>
+        </div>
+
+        <div class="chart-container">
+            <canvas id="chart-caso1"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- ================================================ -->
+<!-- SLIDE 7: CASO 2 CON GRAFICO -->
+<!-- ================================================ -->
+<div class="slide" id="slide-7">
+    <h2><span class="tag tag-green">CASO 2</span> &nbsp; Grado num = grado den &rarr; \(\frac{a}{b}\)</h2>
+
+    <div class="two-columns">
+        <div>
+            <div class="formula-box green">
+                \[ \lim_{x\to\pm\infty} \frac{ax^n + \ldots}{bx^n + \ldots} = \frac{a}{b} \]
+            </div>
+
+            <p><b>Esempio:</b></p>
+            <div class="formula-box" style="font-size:24px;">
+                \[ \lim_{x\to-\infty} \frac{7x + 2}{x - 3} \]
+            </div>
+
+            <div class="step visible" id="step7-1">
+                <p>Grado num = <b>1</b>, grado den = <b>1</b></p>
+            </div>
+            <div class="step" id="step7-2">
+                <p>Gradi uguali! Coefficienti: \(\frac{7}{1}\)</p>
+            </div>
+            <div class="step" id="step7-3">
+                <p style="font-size:26px; font-weight:600; color:#16a34a;">\(\Rightarrow\) Limite = \(\boxed{7}\) &emsp; AO: \(y = 7\)</p>
+            </div>
+
+            <button class="reveal-btn" onclick="revealSteps('step7-', 3)">Passo successivo</button>
+
+            <div class="note" style="margin-top:12px; font-size:18px;">
+                <b>Attenzione:</b> guarda SOLO i coefficienti del termine di grado massimo. Ignora tutto il resto!
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <canvas id="chart-caso2"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- ================================================ -->
+<!-- SLIDE 8: CASO 3 CON GRAFICO -->
+<!-- ================================================ -->
+<div class="slide" id="slide-8">
+    <h2><span class="tag tag-red">CASO 3</span> &nbsp; Grado num &gt; grado den &rarr; \(\pm\infty\)</h2>
+
+    <div class="two-columns">
+        <div>
+            <div class="formula-box red">
+                \[ \lim_{x\to\pm\infty} \frac{ax^n + \ldots}{bx^m + \ldots} = \pm\infty \quad \text{se } n > m \]
+            </div>
+
+            <p><b>Esempio:</b></p>
+            <div class="formula-box" style="font-size:24px;">
+                \[ \lim_{x\to+\infty} \frac{2x^3 - x}{x^2 + 1} \]
+            </div>
+
+            <div class="step visible" id="step8-1">
+                <p>Grado num = <b>3</b>, grado den = <b>2</b></p>
+            </div>
+            <div class="step" id="step8-2">
+                <p>Poiche' \(3 > 2\): il numeratore domina</p>
+                <p>Semplifica: \(\frac{2x^3}{x^2} = 2x \to +\infty\)</p>
+            </div>
+            <div class="step" id="step8-3">
+                <p style="font-size:26px; font-weight:600; color:#dc2626;">\(\Rightarrow\) Limite = \(\boxed{+\infty}\) &emsp; Nessun AO!</p>
+            </div>
+            <div class="step" id="step8-4">
+                <p>Per \(x \to -\infty\): \(2x \to -\infty\), quindi limite = \(\boxed{-\infty}\)</p>
+            </div>
+
+            <button class="reveal-btn" onclick="revealSteps('step8-', 4)">Passo successivo</button>
+        </div>
+
+        <div class="chart-container">
+            <canvas id="chart-caso3"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- ================================================ -->
+<!-- SLIDE 9: ESPLORA INTERATTIVO -->
+<!-- ================================================ -->
+<div class="slide" id="slide-9">
+    <h2>Esplora: cambia i coefficienti</h2>
+
+    <div class="two-columns">
+        <div>
+            <p>Funzione: \(f(x) = \dfrac{ax^2 + bx + c}{dx^2 + ex + f}\)</p>
+
+            <div class="graph-controls">
+                <div style="font-weight:600; margin-bottom:12px; font-size:18px;">Numeratore</div>
+                <div class="control-group">
+                    <label>a (coeff. \(x^2\))</label>
+                    <div class="control-row">
+                        <input type="range" id="sl-a" min="-5" max="5" step="1" value="3">
+                        <span class="value" id="val-a">3</span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label>b (coeff. \(x\))</label>
+                    <div class="control-row">
+                        <input type="range" id="sl-b" min="-10" max="10" step="1" value="1">
+                        <span class="value" id="val-b">1</span>
+                    </div>
+                </div>
+                <div style="font-weight:600; margin: 16px 0 12px; font-size:18px;">Denominatore</div>
+                <div class="control-group">
+                    <label>d (coeff. \(x^2\))</label>
+                    <div class="control-row">
+                        <input type="range" id="sl-d" min="-5" max="5" step="1" value="2">
+                        <span class="value" id="val-d">2</span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label>e (coeff. \(x\))</label>
+                    <div class="control-row">
+                        <input type="range" id="sl-e" min="-10" max="10" step="1" value="-1">
+                        <span class="value" id="val-e">-1</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="explore-result" style="margin-top:16px; font-size:22px; font-weight:600; padding:16px; background:#f0fdf4; border-radius:8px; border:1px solid #bbf7d0;">
+                Gradi uguali (2 = 2) &rarr; Limite = 3/2 = 1,5 &rarr; AO: y = 1,5
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <canvas id="chart-explore"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- ================================================ -->
+<!-- SLIDE 10: ERRORI TIPICI -->
+<!-- ================================================ -->
+<div class="slide" id="slide-10">
+    <h2>Errori da evitare</h2>
+
+    <div class="three-columns" style="margin-top:20px;">
+        <div class="caso-card" style="border-color:#fee2e2;">
+            <h3 style="color:#dc2626;">Errore 1</h3>
+            <div class="formula-box red" style="font-size:24px; text-align:center;">
+                \[\frac{\infty}{\infty} = 1\]
+            </div>
+            <p style="font-size:20px;"><b>SBAGLIATO!</b></p>
+            <p style="font-size:18px;">\(\frac{\infty}{\infty}\) e' una forma indeterminata. Il risultato dipende da COME numeratore e denominatore vanno a infinito.</p>
+            <div class="formula-box green" style="font-size:18px; padding:12px;">
+                Usa la regola dei gradi!
+            </div>
+        </div>
+
+        <div class="caso-card" style="border-color:#fee2e2;">
+            <h3 style="color:#dc2626;">Errore 2</h3>
+            <p style="font-size:20px;">Dimenticare il <b>segno</b> nel Caso 3</p>
+            <div class="formula-box" style="font-size:20px; padding:12px;">
+                \[\lim_{x\to-\infty} \frac{2x^3}{x^2} = 2x\]
+            </div>
+            <p style="font-size:18px;">A \(+\infty\): \(2x \to +\infty\)</p>
+            <p style="font-size:18px;">A \(-\infty\): \(2x \to \mathbf{-\infty}\)</p>
+            <div class="formula-box green" style="font-size:18px; padding:12px;">
+                Sostituisci mentalmente \(x\) con un numero negativo grande!
+            </div>
+        </div>
+
+        <div class="caso-card" style="border-color:#fee2e2;">
+            <h3 style="color:#dc2626;">Errore 3</h3>
+            <p style="font-size:20px;">Confondere <b>gradi</b> e <b>coefficienti</b></p>
+            <div class="formula-box" style="font-size:20px; padding:12px;">
+                \[\frac{6x^2 + x}{3x^2 - 5}\]
+            </div>
+            <p style="font-size:18px;">Grado num = <b>2</b>, non 6!</p>
+            <p style="font-size:18px;">Grado den = <b>2</b>, non 3!</p>
+            <div class="formula-box green" style="font-size:18px; padding:12px;">
+                Gradi uguali &rarr; \(\frac{6}{3} = 2\)
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ================================================ -->
+<!-- SLIDE 11: PROCEDURA RIASSUNTIVA -->
+<!-- ================================================ -->
+<div class="slide" id="slide-11">
+    <h2>Procedura in 3 passi</h2>
+
+    <div class="two-columns">
+        <div>
+            <div style="background:#f8fafc; border-radius:12px; padding:30px; border:1px solid #e2e8f0;">
+                <div style="display:flex; align-items:start; gap:20px; margin-bottom:24px;">
+                    <div style="background:#2563eb; color:white; width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:22px; font-weight:700; flex-shrink:0;">1</div>
+                    <div>
+                        <p style="font-size:22px; font-weight:600;">Trova i gradi</p>
+                        <p style="font-size:18px; color:#64748b;">Grado del numeratore = \(n\), grado del denominatore = \(m\)</p>
+                    </div>
+                </div>
+
+                <div style="display:flex; align-items:start; gap:20px; margin-bottom:24px;">
+                    <div style="background:#2563eb; color:white; width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:22px; font-weight:700; flex-shrink:0;">2</div>
+                    <div>
+                        <p style="font-size:22px; font-weight:600;">Confronta \(n\) e \(m\)</p>
+                        <p style="font-size:18px; color:#64748b;">Quale dei 3 casi e'?</p>
+                    </div>
+                </div>
+
+                <div style="display:flex; align-items:start; gap:20px;">
+                    <div style="background:#2563eb; color:white; width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:22px; font-weight:700; flex-shrink:0;">3</div>
+                    <div>
+                        <p style="font-size:22px; font-weight:600;">Applica la regola</p>
+                        <p style="font-size:18px; color:#64748b;">Caso 3: determina anche il segno!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <table class="data-table" style="font-size:22px;">
+                <tr><th>Se...</th><th>Limite</th><th>AO</th></tr>
+                <tr><td>\(n < m\)</td><td>\(0\)</td><td>\(y = 0\)</td></tr>
+                <tr><td>\(n = m\)</td><td>\(\frac{a}{b}\)</td><td>\(y = \frac{a}{b}\)</td></tr>
+                <tr><td>\(n > m\)</td><td>\(\pm\infty\)</td><td>nessuno</td></tr>
+            </table>
+
+            <div class="note" style="margin-top:24px;">
+                Dove \(a\) e \(b\) sono i coefficienti del termine di grado massimo al numeratore e al denominatore.
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ================================================ -->
+<!-- SLIDE 12: ESERCIZI INTERATTIVI -->
+<!-- ================================================ -->
+<div class="slide" id="slide-12">
+    <h2>Mettiti alla prova</h2>
+
+    <div style="max-width:800px;">
+        <div id="quiz-1" style="background:#f8fafc; padding:24px; border-radius:12px; border:1px solid #e2e8f0; margin-bottom:20px;">
+            <p style="font-size:22px; margin-bottom:12px;"><b>1.</b> \(\lim_{x\to+\infty} \dfrac{4x - 1}{x^2 + 3}\)</p>
+            <div class="exercise-row">
+                <span>Caso:</span>
+                <select id="q1-caso"><option value="">--</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select>
+                <span>Limite:</span>
+                <input type="text" id="q1-lim" placeholder="?">
+                <span>AO:</span>
+                <input type="text" id="q1-ao" placeholder="y = ?">
+                <button class="check-btn" onclick="checkQuiz(1, '1', '0', 'y=0')">Verifica</button>
+            </div>
+            <div class="feedback" id="fb-1"></div>
+        </div>
+
+        <div id="quiz-2" style="background:#f8fafc; padding:24px; border-radius:12px; border:1px solid #e2e8f0; margin-bottom:20px;">
+            <p style="font-size:22px; margin-bottom:12px;"><b>2.</b> \(\lim_{x\to+\infty} \dfrac{6x^2 + x}{3x^2 - 5}\)</p>
+            <div class="exercise-row">
+                <span>Caso:</span>
+                <select id="q2-caso"><option value="">--</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select>
+                <span>Limite:</span>
+                <input type="text" id="q2-lim" placeholder="?">
+                <span>AO:</span>
+                <input type="text" id="q2-ao" placeholder="y = ?">
+                <button class="check-btn" onclick="checkQuiz(2, '2', '2', 'y=2')">Verifica</button>
+            </div>
+            <div class="feedback" id="fb-2"></div>
+        </div>
+
+        <div id="quiz-3" style="background:#f8fafc; padding:24px; border-radius:12px; border:1px solid #e2e8f0; margin-bottom:20px;">
+            <p style="font-size:22px; margin-bottom:12px;"><b>3.</b> \(\lim_{x\to-\infty} \dfrac{x^3 + 2}{2x^2 - 1}\)</p>
+            <div class="exercise-row">
+                <span>Caso:</span>
+                <select id="q3-caso"><option value="">--</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select>
+                <span>Limite:</span>
+                <input type="text" id="q3-lim" placeholder="?">
+                <span>AO:</span>
+                <input type="text" id="q3-ao" placeholder="?">
+                <button class="check-btn" onclick="checkQuiz(3, '3', '-inf', 'no')">Verifica</button>
+            </div>
+            <div class="feedback" id="fb-3"></div>
+        </div>
+
+        <div id="quiz-4" style="background:#f8fafc; padding:24px; border-radius:12px; border:1px solid #e2e8f0;">
+            <p style="font-size:22px; margin-bottom:12px;"><b>4.</b> \(\lim_{x\to+\infty} \dfrac{-8x + 5}{2x - 1}\)</p>
+            <div class="exercise-row">
+                <span>Caso:</span>
+                <select id="q4-caso"><option value="">--</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select>
+                <span>Limite:</span>
+                <input type="text" id="q4-lim" placeholder="?">
+                <span>AO:</span>
+                <input type="text" id="q4-ao" placeholder="y = ?">
+                <button class="check-btn" onclick="checkQuiz(4, '2', '-4', 'y=-4')">Verifica</button>
+            </div>
+            <div class="feedback" id="fb-4"></div>
+        </div>
+    </div>
+</div>
+
+<!-- ================================================ -->
+<!-- SLIDE 13: ADESSO TOCCA A VOI -->
+<!-- ================================================ -->
+<div class="slide" id="slide-13">
+    <h2>Adesso tocca a voi!</h2>
+    <p class="subtitle">Prendete la scheda e lavorate a coppie</p>
+
+    <div style="flex:1; display:flex; align-items:center; justify-content:center;">
+        <div style="text-align:center; max-width:700px;">
+            <div style="font-size:72px; margin-bottom:30px;">&#9997;&#65039;</div>
+
+            <div style="background:#f0fdf4; padding:30px; border-radius:12px; border:2px solid #86efac; margin-bottom:30px;">
+                <p style="font-size:24px; margin-bottom:12px;"><b>Per ogni esercizio, sul quaderno scrivete:</b></p>
+                <p style="font-size:22px;">1. Il <b>caso</b> (1, 2 o 3)</p>
+                <p style="font-size:22px;">2. Il <b>limite</b></p>
+                <p style="font-size:22px;">3. L'<b>AO</b> (se esiste)</p>
+                <p style="font-size:22px;">4. Uno <b>schizzo del grafico</b></p>
+            </div>
+
+            <p style="font-size:24px; color:#dc2626; font-weight:600;">La scheda va consegnata a fine ora!</p>
+        </div>
+    </div>
+</div>
+
+
+<!-- ================================================ -->
+<!-- NAVIGAZIONE -->
+<!-- ================================================ -->
+<div class="nav">
+    <button id="prev-btn" onclick="prevSlide()">&larr; Indietro</button>
+    <span class="slide-counter"><span id="current-slide">1</span> / <span id="total-slides">13</span></span>
+    <button id="next-btn" onclick="nextSlide()">Avanti &rarr;</button>
+</div>
+
+<script>
+// === NAVIGAZIONE ===
+let currentSlide = 1;
+const slides = document.querySelectorAll('.slide');
+const totalSlides = slides.length;
+document.getElementById('total-slides').textContent = totalSlides;
+
+function showSlide(n) {
+    slides.forEach(s => s.classList.remove('active'));
+    currentSlide = Math.max(1, Math.min(n, totalSlides));
+    slides[currentSlide - 1].classList.add('active');
+    document.getElementById('current-slide').textContent = currentSlide;
+    document.getElementById('prev-btn').disabled = currentSlide === 1;
+    document.getElementById('next-btn').disabled = currentSlide === totalSlides;
+    document.getElementById('progress-bar').style.width = ((currentSlide / totalSlides) * 100) + '%';
+    initSlideCharts();
+}
+function nextSlide() { showSlide(currentSlide + 1); }
+function prevSlide() { showSlide(currentSlide - 1); }
+
+document.addEventListener('keydown', (e) => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextSlide(); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); prevSlide(); }
+    if (e.key === 'Home') showSlide(1);
+    if (e.key === 'End') showSlide(totalSlides);
+});
+
+// === SLIDE 3: TABELLA REVEAL ===
+let currentRow = 0;
+function revealRows() {
+    currentRow++;
+    const row = document.getElementById('row-' + currentRow);
+    if (row) {
+        row.classList.remove('fade');
+        row.classList.add('highlight-row');
+        // un-highlight previous
+        if (currentRow > 1) document.getElementById('row-' + (currentRow-1)).classList.remove('highlight-row');
+    }
+    if (currentRow >= 5) {
+        document.getElementById('table-conclusion').style.opacity = '1';
+    }
+    updateApproachChart();
+}
+
+// === STEP REVEAL GENERIC ===
+const stepCounters = {};
+function revealSteps(prefix, total) {
+    if (!stepCounters[prefix]) stepCounters[prefix] = 1;
+    stepCounters[prefix]++;
+    const step = document.getElementById(prefix + stepCounters[prefix]);
+    if (step) step.classList.add('visible');
+}
+
+function revealStep4() {
+    revealSteps('step4-', 5);
+}
+
+// === CHARTS ===
+const charts = {};
+
+function makeRationalData(numCoeffs, denCoeffs, xmin, xmax, step) {
+    // numCoeffs/denCoeffs: arrays [highest degree coeff, ..., constant]
+    const data = [];
+    for (let x = xmin; x <= xmax; x += step) {
+        let num = 0, den = 0;
+        for (let i = 0; i < numCoeffs.length; i++) {
+            num += numCoeffs[i] * Math.pow(x, numCoeffs.length - 1 - i);
+        }
+        for (let i = 0; i < denCoeffs.length; i++) {
+            den += denCoeffs[i] * Math.pow(x, denCoeffs.length - 1 - i);
+        }
+        const y = den !== 0 ? num / den : null;
+        if (y !== null && Math.abs(y) < 50) {
+            data.push({x, y});
+        }
+    }
+    return data;
+}
+
+function createChart(canvasId, datasets, xmin, xmax, ymin, ymax, aoValue) {
+    const ctx = document.getElementById(canvasId);
+    if (!ctx) return null;
+    if (charts[canvasId]) { charts[canvasId].destroy(); }
+
+    const allDatasets = [...datasets];
+    if (aoValue !== null && aoValue !== undefined) {
+        allDatasets.push({
+            label: 'AO: y = ' + aoValue,
+            data: [{x: xmin, y: aoValue}, {x: xmax, y: aoValue}],
+            borderColor: '#dc2626',
+            borderWidth: 2,
+            borderDash: [8, 4],
+            pointRadius: 0,
+            fill: false
+        });
+    }
+
+    charts[canvasId] = new Chart(ctx, {
+        type: 'line',
+        data: { datasets: allDatasets },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            animation: { duration: 300 },
+            scales: {
+                x: { type: 'linear', min: xmin, max: xmax, grid: { color: '#e2e8f0' },
+                    ticks: { font: { size: 14 } } },
+                y: { type: 'linear', min: ymin, max: ymax, grid: { color: '#e2e8f0' },
+                    ticks: { font: { size: 14 } } }
+            },
+            plugins: {
+                legend: { display: allDatasets.length > 1, labels: { font: { size: 14 } } }
+            }
+        }
+    });
+    return charts[canvasId];
+}
+
+// === APPROACH CHART (SLIDE 3) ===
+const approachPoints = [
+    {x:1, y:0.333}, {x:10, y:2.275}, {x:100, y:2.484}, {x:1000, y:2.4985}, {x:10000, y:2.49998}
+];
+let shownApproachPoints = 0;
+
+function updateApproachChart() {
+    shownApproachPoints = currentRow;
+    const pts = approachPoints.slice(0, shownApproachPoints);
+    if (charts['chart-approach']) {
+        charts['chart-approach'].data.datasets[0].data = pts;
+        charts['chart-approach'].update();
+    }
+}
+
+function initApproachChart() {
+    const pts = approachPoints.slice(0, Math.max(shownApproachPoints, 0));
+    createChart('chart-approach', [{
+        label: 'f(x)',
+        data: pts,
+        borderColor: '#2563eb',
+        backgroundColor: '#2563eb',
+        borderWidth: 2,
+        pointRadius: 6,
+        pointBackgroundColor: '#2563eb',
+        showLine: true,
+        tension: 0.3,
+        fill: false
+    }], 0, 11000, -0.5, 4, 2.5);
+}
+
+// === CASO CHARTS ===
+function initCaso1Chart() {
+    createChart('chart-caso1', [{
+        label: 'f(x) = (3x+1)/(x²-4)',
+        data: makeRationalData([3, 1], [1, 0, -4], -15, 15, 0.3),
+        borderColor: '#2563eb',
+        borderWidth: 2.5,
+        pointRadius: 0,
+        fill: false,
+        tension: 0.1
+    }], -15, 15, -3, 5, 0);
+}
+
+function initCaso2Chart() {
+    createChart('chart-caso2', [{
+        label: 'f(x) = (7x+2)/(x-3)',
+        data: makeRationalData([7, 2], [1, -3], -20, 20, 0.3),
+        borderColor: '#16a34a',
+        borderWidth: 2.5,
+        pointRadius: 0,
+        fill: false,
+        tension: 0.1
+    }], -20, 20, -15, 30, 7);
+}
+
+function initCaso3Chart() {
+    createChart('chart-caso3', [{
+        label: 'f(x) = (2x³-x)/(x²+1)',
+        data: makeRationalData([2, 0, -1, 0], [1, 0, 1], -8, 8, 0.15),
+        borderColor: '#dc2626',
+        borderWidth: 2.5,
+        pointRadius: 0,
+        fill: false,
+        tension: 0.1
+    }], -8, 8, -20, 20, null);
+}
+
+// === EXPLORE CHART (SLIDE 9) ===
+function getExploreParams() {
+    return {
+        a: parseInt(document.getElementById('sl-a').value),
+        b: parseInt(document.getElementById('sl-b').value),
+        d: parseInt(document.getElementById('sl-d').value),
+        e: parseInt(document.getElementById('sl-e').value)
+    };
+}
+
+function updateExplore() {
+    const p = getExploreParams();
+    const data = makeRationalData([p.a, p.b, 0], [p.d, p.e, 1], -20, 20, 0.3);
+
+    let ao = null;
+    let resultText = '';
+    const nDeg = p.a !== 0 ? 2 : (p.b !== 0 ? 1 : 0);
+    const dDeg = p.d !== 0 ? 2 : (p.e !== 0 ? 1 : 0);
+
+    if (nDeg < dDeg) {
+        ao = 0;
+        resultText = `Caso 1: gr ${nDeg} < gr ${dDeg} → Limite = 0 → AO: y = 0`;
+    } else if (nDeg === dDeg) {
+        const numCoeff = nDeg === 2 ? p.a : p.b;
+        const denCoeff = dDeg === 2 ? p.d : p.e;
+        if (denCoeff !== 0) {
+            ao = numCoeff / denCoeff;
+            resultText = `Caso 2: gr ${nDeg} = gr ${dDeg} → Limite = ${numCoeff}/${denCoeff} = ${ao.toFixed(2)} → AO: y = ${ao.toFixed(2)}`;
+        } else {
+            resultText = 'Denominatore ha coefficiente 0 al grado massimo';
+        }
+    } else {
+        resultText = `Caso 3: gr ${nDeg} > gr ${dDeg} → Limite = ±∞ → Nessun AO`;
+    }
+
+    document.getElementById('explore-result').innerHTML = resultText;
+
+    if (charts['chart-explore']) { charts['chart-explore'].destroy(); }
+    createChart('chart-explore', [{
+        label: 'f(x)',
+        data: data,
+        borderColor: '#2563eb',
+        borderWidth: 2.5,
+        pointRadius: 0,
+        fill: false,
+        tension: 0.1
+    }], -20, 20, -15, 15, ao);
+}
+
+function initExploreChart() {
+    updateExplore();
+}
+
+// === INIT CHARTS PER SLIDE ===
+function initSlideCharts() {
+    if (currentSlide === 3) initApproachChart();
+    if (currentSlide === 6) initCaso1Chart();
+    if (currentSlide === 7) initCaso2Chart();
+    if (currentSlide === 8) initCaso3Chart();
+    if (currentSlide === 9) initExploreChart();
+}
+
+// === SLIDER LISTENERS ===
+['sl-a','sl-b','sl-d','sl-e'].forEach(id => {
+    document.getElementById(id)?.addEventListener('input', function() {
+        document.getElementById('val-' + id.split('-')[1]).textContent = this.value;
+        if (currentSlide === 9) updateExplore();
+    });
+});
+
+// === QUIZ CHECK ===
+function checkQuiz(n, correctCaso, correctLim, correctAO) {
+    const caso = document.getElementById('q'+n+'-caso').value;
+    const lim = document.getElementById('q'+n+'-lim').value.trim().replace(/\s/g,'');
+    const ao = document.getElementById('q'+n+'-ao').value.trim().replace(/\s/g,'').toLowerCase();
+    const fb = document.getElementById('fb-'+n);
+
+    const casoOk = caso === correctCaso;
+    const limNorm = lim.replace(',','.').replace('−','-').replace('+inf','+infinito').replace('-inf','-infinito');
+    const correctLimNorm = correctLim.replace(',','.');
+
+    let limOk = false;
+    if (correctLim === '0') limOk = limNorm === '0';
+    else if (correctLim === '-inf') limOk = limNorm.includes('-') && (limNorm.includes('inf') || limNorm.includes('∞'));
+    else if (correctLim === '+inf') limOk = !limNorm.includes('-') && (limNorm.includes('inf') || limNorm.includes('∞'));
+    else limOk = parseFloat(limNorm) === parseFloat(correctLimNorm);
+
+    const aoNorm = ao.replace(',','.').replace('−','-').replace(' ','');
+    const correctAONorm = correctAO.replace(' ','').toLowerCase();
+    let aoOk = false;
+    if (correctAO === 'no') aoOk = aoNorm.includes('no') || aoNorm.includes('nessun') || aoNorm === '-' || aoNorm === '/';
+    else aoOk = aoNorm === correctAONorm || aoNorm === correctAONorm.replace('y=','');
+
+    if (casoOk && limOk && aoOk) {
+        fb.innerHTML = '&#10003; Tutto corretto!';
+        fb.className = 'feedback correct';
+    } else {
+        let hints = [];
+        if (!casoOk) hints.push('caso');
+        if (!limOk) hints.push('limite');
+        if (!aoOk) hints.push('AO');
+        fb.innerHTML = '&#10007; Controlla: ' + hints.join(', ');
+        fb.className = 'feedback incorrect';
+    }
+}
+
+// === INIT ===
+showSlide(1);
+</script>
+
+</body>
+</html>
